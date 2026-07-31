@@ -141,6 +141,7 @@ $disabledStyle = 'background:#f7fafc; cursor:not-allowed;';
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2> Student Portal</h2>
+                <p class="school-name"><?php echo APP_NAME; ?></p>
                 <p><?php echo htmlspecialchars($_SESSION['first_name']); ?></p>
             </div>
             <ul class="sidebar-nav">

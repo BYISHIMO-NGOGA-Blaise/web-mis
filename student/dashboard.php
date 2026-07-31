@@ -69,6 +69,7 @@ $greeting = 'Good ' . (date('H') < 12 ? 'Morning' : (date('H') < 17 ? 'Afternoon
             <div class="sidebar-header">
                 <div class="sidebar-logo"><i class="fas fa-user-graduate"></i></div>
                 <h2>Student Portal</h2>
+                <p class="school-name"><?php echo APP_NAME; ?></p>
                 <p><?php echo htmlspecialchars($_SESSION['first_name']); ?></p>
             </div>
             <ul class="sidebar-nav">

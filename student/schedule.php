@@ -27,16 +27,73 @@ $scheduleRows = $result->fetch_all(MYSQLI_ASSOC);
 
 // CSV download
 if (isset($_GET['download']) && $_GET['download'] === 'csv') {
-    header('Content-Type: text/csv');
+    header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="schedule_' . $studentId . '.csv"');
-    $out = fopen('php://output', 'w');
-    fputcsv($out, ['Course Code','Course Name','Department','Lecturer','Semester','Day','Start Time','End Time','Location']);
-    foreach ($scheduleRows as $row) {
-        fputcsv($out, [
-            $row['code'], $row['name'], $row['dept_name'] ?? '', $row['lecturer_name'] ?? '', intval($row['semester']), $row['day'] ?? '', $row['start_time'] ?? '', $row['end_time'] ?? '', $row['location'] ?? ''
+
+    $output = fopen('php://output', 'w');
+
+    // Student info
+    $studentInfo = $conn->prepare("SELECT first_name, last_name, email, reg_number FROM users WHERE id = ?");
+    $studentInfo->bind_param("i", $studentId);
+    $studentInfo->execute();
+    $sInfo = $studentInfo->get_result()->fetch_assoc();
+    $studentInfo->close();
+
+    $semester = $scheduleRows[0]['semester'] ?? 'N/A';
+
+    fputcsv($output, [APP_NAME . ' - Student Course Schedule']);
+    fputcsv($output, ['Student', $sInfo['first_name'] . ' ' . $sInfo['last_name']]);
+    fputcsv($output, ['Reg Number', $sInfo['reg_number'] ?? 'N/A']);
+    fputcsv($output, ['Semester', $semester]);
+    fputcsv($output, ['Academic Year', date('Y')]);
+    fputcsv($output, ['Generated', date('F d, Y H:i:s')]);
+    fputcsv($output, []);
+
+    // Courses
+    $totalCredits = 0;
+    $coursesMap = [];
+    foreach ($scheduleRows as $r) {
+        $code = $r['code'];
+        if (!isset($coursesMap[$code])) {
+            $coursesMap[$code] = $r;
+            $totalCredits += intval($r['credits'] ?? 0);
+        }
+    }
+
+    fputcsv($output, ['ENROLLED COURSES SUMMARY']);
+    fputcsv($output, ['Total Courses', count($coursesMap)]);
+    fputcsv($output, ['Total Credits', $totalCredits]);
+    fputcsv($output, []);
+
+    fputcsv($output, ['COURSE DETAILS']);
+    fputcsv($output, ['Code', 'Course Name', 'Department', 'Lecturer', 'Credits', 'Location']);
+    foreach ($coursesMap as $c) {
+        fputcsv($output, [
+            $c['code'],
+            $c['name'],
+            $c['dept_name'] ?? 'N/A',
+            $c['lecturer_name'] ?? 'N/A',
+            $c['credits'] ?? '-',
+            $c['location'] ?? 'TBD'
         ]);
     }
-    fclose($out);
+    fputcsv($output, []);
+
+    fputcsv($output, ['WEEKLY TIMETABLE']);
+    fputcsv($output, ['Day', 'Time', 'Course Code', 'Course Name', 'Location']);
+    foreach ($scheduleRows as $r) {
+        if (!empty($r['day'])) {
+            fputcsv($output, [
+                $r['day'],
+                ($r['start_time'] ?? '') . ' - ' . ($r['end_time'] ?? ''),
+                $r['code'],
+                $r['name'],
+                $r['location'] ?? 'TBD'
+            ]);
+        }
+    }
+
+    fclose($output);
     $stmt->close();
     $conn->close();
     exit();
@@ -89,6 +146,7 @@ $conn->close();
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2> Student Portal</h2>
+                <p class="school-name"><?php echo APP_NAME; ?></p>
                 <p><?php echo htmlspecialchars($_SESSION['first_name']); ?></p>
             </div>
             <ul class="sidebar-nav">

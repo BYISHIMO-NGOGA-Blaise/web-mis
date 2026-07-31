@@ -4,23 +4,7 @@ require_once 'includes/config.php';
 $error = '';
 $email = '';
 
-// Rate limiting: max 5 attempts per 15 minutes per IP
-$rateKey = 'login_attempts_' . md5($_SERVER['REMOTE_ADDR'] ?? '0');
-if (!isset($_SESSION[$rateKey])) {
-    $_SESSION[$rateKey] = ['count' => 0, 'first_attempt' => time()];
-}
-$rate = $_SESSION[$rateKey];
-
-// Reset if 15 minutes passed
-if (time() - $rate['first_attempt'] > 900) {
-    $_SESSION[$rateKey] = ['count' => 0, 'first_attempt' => time()];
-    $rate = $_SESSION[$rateKey];
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($rate['count'] >= 5) {
-        $error = 'Too many login attempts. Please try again in 15 minutes.';
-    } else {
     $email = sanitize($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     
@@ -76,17 +60,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             } else {
                 $error = 'Invalid email or password.';
-                $_SESSION[$rateKey]['count']++;
             }
         } else {
             $error = 'Invalid email or password.';
-            $_SESSION[$rateKey]['count']++;
         }
         
         $stmt->close();
         $conn->close();
     }
-    } // end rate limit check
 }
 ?>
 <!DOCTYPE html>

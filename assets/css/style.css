@@ -345,6 +345,7 @@ textarea { min-height: 100px; resize: vertical; }
     letter-spacing: -0.01em;
 }
 .sidebar-header p { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.5; }
+.sidebar-header .school-name { color: rgba(255,255,255,0.85); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.1rem; }
 .sidebar-nav { list-style: none; padding: 1rem 0.75rem; flex: 1; }
 .sidebar-nav li { margin-bottom: 0.2rem; }
 .sidebar-nav a {

@@ -233,6 +233,7 @@ function renderSidebar($activePage, $portalOverride = null) {
     echo '<div class="sidebar-header">';
     echo '<div class="sidebar-logo"><i class="fas ' . $portalIcon . '"></i></div>';
     echo '<h2>' . $portalLabel . '</h2>';
+    echo '<p class="school-name">' . APP_NAME . '</p>';
     echo '<p>' . htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']) . '</p>';
     if ($dual) {
         echo '<p style="font-size:12px; color:#a0aec0; margin-top:2px;">' . $portalSub . '</p>';
